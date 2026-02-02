@@ -12,10 +12,13 @@ from webdriver_manager.chrome import ChromeDriverManager
 def scrape_website():
     # Configurar Selenium
     options = Options()
-    #options.add_argument('--headless')  # Ejecutar en modo headless
+    options.add_argument('--headless')  # Ejecutar en modo headless
     options.add_argument('--no-sandbox')  # Requerido para algunos servidores
     options.add_argument('--disable-dev-shm-usage')  # Para evitar errores de memoria
-
+    options.add_argument('--disable-blink-features=AutomationControlled')
+    options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    options.add_experimental_option('useAutomationExtension', False)
+    options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
     # 🔹 Aquí inicializamos correctamente `service`
     service = Service(ChromeDriverManager().install())
 
@@ -24,11 +27,25 @@ def scrape_website():
     #service = Service()  # No es necesario especificar el ejecutable
     driver = webdriver.Chrome(service=service, options=options)
 
+    wait = WebDriverWait(driver, 15)
+    
     # Navegar al sitio web
     url = "https://www.pccomponentes.com/portatiles/nuevo/para-profesionales?seller=pccomponentes"
     driver.get(url)
     print(driver.title)
     time.sleep(5)
+    
+    try:
+        print("Buscando botón de cookies...")
+        # Usamos el mismo selector que funcionó en Docker
+        accept_button = wait.until(
+            EC.element_to_be_clickable((By.ID, "cookiesAcceptAll"))
+        )
+        accept_button.click()
+        print("¡Cookies aceptadas!")
+        time.sleep(2) # Pequeña pausa para que la página se recargue
+    except Exception as e:
+        print(f"No se encontró el popup de cookies, continuando... {e}")
     
     products = driver.find_elements(By.CSS_SELECTOR, "div.product-card")
     ofertas = []  
