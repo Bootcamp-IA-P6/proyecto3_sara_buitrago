@@ -69,6 +69,12 @@ RUN case $(dpkg --print-architecture) in \
 COPY requirements.txt /app/
 RUN python -m pip install --no-cache-dir -r requirements.txt
 
+# Create screenshots directory and set permissions
+RUN mkdir -p /app/screenshots && chmod 777 /app/screenshots
+
+# Create volume for screenshots para acceder a ellas
+VOLUME ["/app/screenshots"]
+
 # Ensure permissions for SQLite database and source code
 RUN mkdir -p /app/webscraper_project && \
     touch /app/webscraper_project/db.sqlite3 && \

@@ -3,6 +3,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
+import os
+from datetime import datetime
 
 # Para Chrome
 from selenium.webdriver.chrome.service import Service
@@ -14,6 +16,11 @@ from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.firefox.options import Options
 
 def scrape_website():
+    # Configurar directorio para screenshots - Usar ruta absoluta al volumen
+    screenshots_dir = "/app/screenshots"
+    if not os.path.exists(screenshots_dir):
+        os.makedirs(screenshots_dir)
+
     # Configurar Selenium
     options = Options()
     options.add_argument('--headless')  # Ejecutar en modo headless
@@ -44,8 +51,6 @@ def scrape_website():
     print(driver.title)
     
     # <--  Aceptar las cookies  -->
-    # La web no carga el contenido hasta que aceptas las cookies.
-    # Esperamos a que el botón "Aceptar todo" aparezca y sea clickeable.
     try:
         print("Buscando botón de cookies...")
         accept_button = wait.until(
@@ -53,36 +58,23 @@ def scrape_website():
         )
         accept_button.click()
         print("¡Cookies aceptadas!")
-        # Una pequeña pausa para que la página se actualice después del clic.
+        
         time.sleep(2) 
     except Exception as e:
-        # Si por alguna razón no encuentra el botón, que no se pare el script.
         print("No se encontró el popup de cookies, continuando...")
         
-    #pausa funcional para ejecucion:
-    #time.sleep(5)
     
-    # Guardamos el HTML y la pantalla para ver qué está viendo el bot
-    with open('debug_page_source.html', 'w', encoding='utf-8') as f:
-        f.write(driver.page_source)
-    driver.save_screenshot('debug_screenshot.png')
-    print("Archivos de depuración 'debug_page_source.html' y 'debug_screenshot.png' guardados.")
-    # --- FIN DEL PASO DE DEPURACIÓN ---
-    '''
-    try:
-        products_grid = wait.until(
-            EC.visibility_of_element_located((By.CSS_SELECTOR, "div#product-grid"))
-        )
-        print("Cuadrícula de productos encontrada.")
-    except Exception as e:
-        print(f"ERROR CRÍTICO: No se pudo encontrar la cuadrícula de productos. Revisa los archivos de depuración. Error: {e}")
-        driver.quit()
-        return []
-    '''
+    
+    # CAPTURA DE PANTALLA - DEBUG
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    screenshot_path = os.path.join(screenshots_dir, f"captura_{timestamp}.png")
+    driver.save_screenshot(screenshot_path)
+    print(f"Captura de pantalla guardada en: {screenshot_path}")
+   
     #busqueda anterior con chrome:
     #products = driver.find_elements(By.CSS_SELECTOR, "div.product-card")
     
-    # buscar productos en la cuadricula(FIREFOX+DOCKER):
+    # buscar productos (FIREFOX+DOCKER):
     products = driver.find_elements(By.CSS_SELECTOR, "div.product-card")
     ofertas = []  
 
@@ -90,7 +82,6 @@ def scrape_website():
     for product in products:
         try:
             # Creamos una espera específica para CADA producto.
-            # Esto evita el error "product_wait is not defined".
             product_wait = WebDriverWait(product, 5)
             
             badge_descuento = product.find_elements(By.CSS_SELECTOR, ".discount-badge") 
