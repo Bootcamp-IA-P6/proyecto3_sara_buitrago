@@ -62,23 +62,6 @@ def scrape_website():
     #pausa funcional para ejecucion:
     #time.sleep(5)
     
-    # Guardamos el HTML y la pantalla para ver qué está viendo el bot
-    with open('debug_page_source.html', 'w', encoding='utf-8') as f:
-        f.write(driver.page_source)
-    driver.save_screenshot('debug_screenshot.png')
-    print("Archivos de depuración 'debug_page_source.html' y 'debug_screenshot.png' guardados.")
-    # --- FIN DEL PASO DE DEPURACIÓN ---
-    '''
-    try:
-        products_grid = wait.until(
-            EC.visibility_of_element_located((By.CSS_SELECTOR, "div#product-grid"))
-        )
-        print("Cuadrícula de productos encontrada.")
-    except Exception as e:
-        print(f"ERROR CRÍTICO: No se pudo encontrar la cuadrícula de productos. Revisa los archivos de depuración. Error: {e}")
-        driver.quit()
-        return []
-    '''
     #busqueda anterior con chrome:
     #products = driver.find_elements(By.CSS_SELECTOR, "div.product-card")
     
